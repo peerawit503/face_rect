@@ -11,30 +11,6 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 
 def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree', verbose=False):
-    """
-    Trains a k-nearest neighbors classifier for face recognition.
-
-    :param train_dir: directory that contains a sub-directory for each known person, with its name.
-
-     (View in source code to see train_dir example tree structure)
-
-     Structure:
-        <train_dir>/
-        ├── <person1>/
-        │   ├── <somename1>.jpeg
-        │   ├── <somename2>.jpeg
-        │   ├── ...
-        ├── <person2>/
-        │   ├── <somename1>.jpeg
-        │   └── <somename2>.jpeg
-        └── ...
-
-    :param model_save_path: (optional) path to save model on disk
-    :param n_neighbors: (optional) number of neighbors to weigh in classification. Chosen automatically if not specified
-    :param knn_algo: (optional) underlying data structure to support knn.default is ball_tree
-    :param verbose: verbosity of training
-    :return: returns knn classifier that was trained on the given data.
-    """
     X = []
     y = []
 
@@ -74,6 +50,12 @@ def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree
 
     return knn_clf
 
+def recount():
+    global detect_delay, detect
+    if detect_delay != 0:
+        detect_delay -= 1
+    else:
+        detect = True
 
 def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
     """
@@ -147,7 +129,8 @@ def show_prediction_labels_on_image(img_path, predictions):
     # Display the resulting image
     pil_image.show()
 
-
+detect = True
+detect_delay = 10
 if __name__ == "__main__":
     video_capture = cv2.VideoCapture(0)
 
@@ -180,9 +163,17 @@ if __name__ == "__main__":
             are_matches = [closest_distances[0][i][0] <= distance_threshold for i in range(len(X_face_locations))]
             predictions = [(pred, loc) if rec else ("unknown", loc) for pred, loc, rec in zip(knn_clf.predict(faces_encodings), X_face_locations, are_matches)]
             for name, (top, right, bottom, left) in predictions:
+                if name != "unknow" and detect:
+                    detect = False
+                    detect_delay = 5
+                    print("beep")
+                elif name == "unknow":
+                    recount()
                 cv2.rectangle(X_img,(left, top),(right, bottom),(0,255,0),3)
                 cv2.rectangle(X_img,(left, bottom - 25),(right, bottom),(0,255,0),3)
                 cv2.putText(X_img,name,( left + 6, bottom - 8  ) ,cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1, cv2.LINE_AA )
+        else:
+            recount()
         cv2.imshow('Display',X_img)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break

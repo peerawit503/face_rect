@@ -1,13 +1,3 @@
-''''
-Capture multiple Faces from multiple users to be stored on a DataBase (dataset directory)
-	==> Faces will be stored on a directory: dataset/ (if does not exist, pls create one)
-	==> Each face will have a unique numeric integer ID as 1, 2, 3, etc                       
-
-Based on original code by Anirban Kar: https://github.com/thecodacus/Face-Recognition    
-
-Developed by Marcelo Rovai - MJRoBot.org @ 21Feb18    
-
-'''
 
 import cv2
 import os
@@ -24,30 +14,7 @@ import sys
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree', verbose=False):
-    """
-        Trains a k-nearest neighbors classifier for face recognition.
-        
-        :param train_dir: directory that contains a sub-directory for each known person, with its name.
-        
-        (View in source code to see train_dir example tree structure)
-        
-        Structure:
-        <train_dir>/
-        ├── <person1>/
-        │   ├── <somename1>.jpeg
-        │   ├── <somename2>.jpeg
-        │   ├── ...
-        ├── <person2>/
-        │   ├── <somename1>.jpeg
-        │   └── <somename2>.jpeg
-        └── ...
-        
-        :param model_save_path: (optional) path to save model on disk
-        :param n_neighbors: (optional) number of neighbors to weigh in classification. Chosen automatically if not specified
-        :param knn_algo: (optional) underlying data structure to support knn.default is ball_tree
-        :param verbose: verbosity of training
-        :return: returns knn classifier that was trained on the given data.
-        """
+    
     X = []
     y = []
     
@@ -105,27 +72,24 @@ if __name__ == "__main__":
     directory = "knn_examples/train/"+str(name)
     if not os.path.exists(directory):
         os.makedirs(directory)
+    count2 = int(len([name for name in os.listdir(directory) if os.path.isfile(os.path.join(directory, name))]))
     while(True):
 
         ret, img = cam.read()
-    #    img = cv2.flip(img, -1) # flip video image vertically
-    #    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         faces = face_detector.detectMultiScale(img, 1.3, 5)
 
         for (x,y,w,h) in faces:
-
-    #        cv2.rectangle(img, (x,y), (x+w,y+h), (255,0,0), 2)
             count += 1
-           
+            count2 += 1
             # Save the captured image into the datasets folder
-            cv2.imwrite("knn_examples/train/" + name +"/" + str(name)  + str(count) + ".jpg", img[y-30:y+h+50,x-30:x+w+50])
-
+            cv2.imwrite("knn_examples/train/" + name +"/" + str(name)  + str(count2) + ".jpg", img[y-30:y+h+50,x-30:x+w+50])
+            cv2.rectangle(img, (x,y), (x+w,y+h), (255,0,0), 2)
             cv2.imshow('image', img)
 
         k = cv2.waitKey(100) & 0xff # Press 'ESC' for exiting video
         if k == 27:
             break
-        elif count >= 50: # Take 30 face sample and stop video
+        elif count >= 20: # Take 30 face sample and stop video
              break
 
     # Do a bit of cleanup

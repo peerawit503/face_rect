@@ -121,6 +121,7 @@ def show_prediction_labels_on_image(img_path, predictions):
 
 detect = True
 detect_delay = 10
+
 if __name__ == "__main__":
     video_capture = cv2.VideoCapture(0)
 

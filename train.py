@@ -84,7 +84,7 @@ if __name__ == "__main__":
             # Save the captured image into the datasets folder
             cv2.imwrite("knn_examples/train/" + name +"/" + str(name)  + str(count2) + ".jpg", img[y-30:y+h+50,x-30:x+w+50])
             cv2.rectangle(img, (x,y), (x+w,y+h), (255,0,0), 2)
-            cv2.imshow('image', img)
+        cv2.imshow('image', img)
 
         k = cv2.waitKey(100) & 0xff # Press 'ESC' for exiting video
         if k == 27:

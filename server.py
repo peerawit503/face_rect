@@ -8,7 +8,6 @@ from sklearn import neighbors
 import os
 import os.path
 import pickle
-
 import face_recognition
 from face_recognition.face_recognition_cli import image_files_in_folder
 import sys
@@ -66,20 +65,24 @@ class Training(Resource):
     def post(self, name):
         cap = cv2.VideoCapture(0)
         name = name
-        face_detector = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
         count = 0
-        directory = "knn_examples/train/"+str(name)
+        face_detector = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+        server_path = "knn_examples/train/"
+        web_path = "../react/hello/public/preview/"
+        directory = server_path+str(name)
+        directory2 = web_path + str(name)
         if not os.path.exists(directory):
             os.makedirs(directory)
+        if not os.path.exists(directory2):
+            os.makedirs(directory2)
         count2 = int(len([name for name in os.listdir(directory) if os.path.isfile(os.path.join(directory, name))]))
         while(True):
             ret, img = cap.read()
             faces = face_detector.detectMultiScale(img, 1.3, 5)
             for (x,y,w,h) in faces:
                 count += 1
-                count2 += 1
-              
-                cv2.imwrite("knn_examples/train/" + name +"/" + str(name)  + str(count2) + ".jpg", img[y-30:y+h+50,x-30:x+w+50])
+                cv2.imwrite(server_path + name +"/" + str(name)  + str(count) + ".jpg", img[y-30:y+h+50,x-30:x+w+50])
+                cv2.imwrite(web_path + name +"/" + str(name)  + str(count) + ".jpg", img[y-30:y+h+50,x-30:x+w+50])
                 cv2.rectangle(img, (x,y), (x+w,y+h), (255,0,0), 2)
             k = cv2.waitKey(100) & 0xff
             if k == 27:
@@ -100,12 +103,21 @@ class Delete(Resource):
         
         return Response("Training Success", mimetype='text/html', status=200 )
 
+class DeletePreview(Resource):
+    def post(self, name):
+        dirpath = "../react/hello/public/preview/"+str(name)
+        if os.path.exists(dirpath) and os.path.isdir(dirpath):
+            shutil.rmtree(dirpath)
+        time.sleep(10)
+        
+        return Response("Training Success", mimetype='text/html', status=200 )
+
 class Edit(Resource):
     def get(self, name, new):
-#        basedir = "knn_examples/train/"+str(name)
-#        newdir = "knn_examples/train/"+str(new)
-#        if os.path.exists(basedir) and os.path.isdir(basedir):
-#            os.rename(basedir , newdir )
+        basedir = "knn_examples/train/"+str(name)
+        newdir = "knn_examples/train/"+str(new)
+        if os.path.exists(basedir) and os.path.isdir(basedir):
+            os.rename(basedir , newdir )
 
        
         return Response("Training Success", mimetype='text/html', status=200 )
@@ -119,7 +131,7 @@ class TrainData(Resource):
 
 class File(Resource):
     def get(self , name):
-        mypath = "knn_examples/train/" + name
+        mypath = "../react/hello/public/preview/" + name
         f = []
         for (dirpath, dirnames, filenames) in os.walk(mypath):
             f.extend(filenames)
@@ -127,8 +139,9 @@ class File(Resource):
 
 api.add_resource(Training, '/add/<name>')
 api.add_resource(Delete, '/delete/<name>')
+api.add_resource(DeletePreview, '/deletePreview/<name>')
 api.add_resource(Edit, '/edit/<name>/<new>')
 api.add_resource(TrainData, '/train')
 api.add_resource(File, '/file/<name>')
 if __name__ == '__main__':
-     app.run()
+    app.run()

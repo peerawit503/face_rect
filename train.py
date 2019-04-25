@@ -70,8 +70,12 @@ if __name__ == "__main__":
     # Initialize individual sampling face count
     count = 0
     directory = "knn_examples/train/"+str(name)
+    directory2 = "../react/hello/src/preview/"+str(name) #new
     if not os.path.exists(directory):
         os.makedirs(directory)
+    if not os.path.exists(directory2):
+        os.makedirs(directory2)
+
     count2 = int(len([name for name in os.listdir(directory) if os.path.isfile(os.path.join(directory, name))]))
     while(True):
 
@@ -83,6 +87,7 @@ if __name__ == "__main__":
             count2 += 1
             # Save the captured image into the datasets folder
             cv2.imwrite("knn_examples/train/" + name +"/" + str(name)  + str(count2) + ".jpg", img[y-30:y+h+50,x-30:x+w+50])
+            cv2.imwrite("../react/hello/src/preview/" + name +"/" + str(name)  + str(count2) + ".jpg", img[y-30:y+h+50,x-30:x+w+50]) #new
             cv2.rectangle(img, (x,y), (x+w,y+h), (255,0,0), 2)
         cv2.imshow('image', img)
 
